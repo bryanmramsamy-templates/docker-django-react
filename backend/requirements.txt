@@ -1,0 +1,8 @@
+Django
+django-cors-headers
+django-extensions
+django-graphql-auth
+graphene-django
+ipython
+psycopg2-binary
+werkzeug

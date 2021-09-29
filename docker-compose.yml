@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: db.volume
+        target: /var/lib/postgresql/data
+    env_file:
+      - dev.env
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: bash scripts/runserver_plus.sh
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /app
+    env_file:
+      - dev.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+      - type: volume
+        source: frontend.volume
+        target: /app/node_modules
+    ports:
+      - 3000:3000
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+
+volumes:
+  db.volume:
+  frontend.volume:
