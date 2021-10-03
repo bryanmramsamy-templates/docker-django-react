@@ -15,14 +15,11 @@ export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ appName }.tokenAuth`;
 export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
 
 
-
-
-
 export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   // Authentication mutations
 
   const [tokenAuth] = useMutation(TOKEN_AUTH_MUTATION);
-  const [verifyToken] = useMutation(VERIFY_TOKEN_MUTATION);
+  const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
 
@@ -51,9 +48,18 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   }, []);
 
   /**
+   * Flag the user as authenticated.
+   */
+  const flagUserAsAuthenticated = useCallback(() => {
+    setIsAuthenticated(true);
+    setInitialLoading(false);
+  }, []);
+
+  /**
    * Renew both tokenAuth and refreshToken if the current refreshToken is valid.
    * Revoke the previous refreshToken when a new one is renewed.
    * @param {String} currentRefreshToken Current refreshToken to check
+   * @return {boolean} True if both tokens successfully renewed
    */
   const tokensRenewal = useCallback(async (currentRefreshToken) => {
     let hasSucceeded = false;
@@ -87,24 +93,21 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
       tokensClear()
       console.log("Token has not successfully been refreshed");  // DEBUG: to be removed
     }
+
+    return hasSucceeded;
   }, [refreshTokenMutation, revokeTokenMutation, tokensClear]);
+
 
   // Effects
 
-  // Refreshes the tokenAuth based on the user's refreshToken each interval
+  /**
+   * Refreshes the tokenAuth and the refreshToken, based on the current
+   * refreshToken stored in localStorage, at each interval. Clears
+   * localStorage if the current refreshToken is not found.
+   */
   useEffect(() => {
-
-    /**
-     * Refreshes the user's tokenAuth and refreshToken at each given interval if
-     * the refreshToken is valid. Then revoke it when the new one is generated.
-     *
-     * Otherwise, clears the localStorage if the refreshToken is not valid or
-     * undefined.
-     *
-     * @return {function} Interval clear callback function
-     */
     const interval = setInterval(() => {
-      (async function loop() {
+      (function loop() {
         const refreshTokenValue = localStorage.getItem(
           LOCALSTORAGE_REFRESH_TOKEN_KEY);
 
@@ -112,105 +115,67 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
           tokensClear();
           console.log("No refreshToken found");  // DEBUG: to be removed
           return null;
+
         } else {
           tokensRenewal(refreshTokenValue);
-
-          /*
-          const refreshResponse = await refreshToken(
-            { variables: {  refreshToken: refreshTokenValue }})
-
-          if (refreshResponse.data.refreshToken.success === true) {
-            localStorage.setItem(
-              LOCALSTORAGE_TOKEN_AUTH_KEY,
-              refreshResponse.data.refreshToken.token,
-            );
-            localStorage.setItem(
-              LOCALSTORAGE_REFRESH_TOKEN_KEY,
-              refreshResponse.data.refreshToken.refreshToken,
-            );
-
-            console.log("Token successfully refreshed");
-          } else {
-            localStorage.clear();
-            setIsAuthenticated(false);
-            setInitialLoading(false);
-          }
-          */
         }
       }())
     }, tokenRefreshInterval);
 
     return () => clearInterval(interval);
-  }, [verifyToken, refreshTokenMutation, tokenRefreshInterval, revokeTokenMutation, tokensRenewal]);
+  }, [tokenRefreshInterval, tokensClear, tokensRenewal]);
 
+  /**
+   * Checks if the user has a valid tokenAuth. If the tokenAuth is not valid,
+   * tries to renew both tokenAuth and refreshToken. Flags the user as
+   * authenticated if one of these two operations succeeds, otherwise as
+   * unauthenticated followed by a localStorage clear.
+   */
+  useEffect(() => {
+    const tokenAuthValue = localStorage.getItem(
+      LOCALSTORAGE_TOKEN_AUTH_KEY
+    );
+    const refreshTokenValue = localStorage.getItem(
+      LOCALSTORAGE_REFRESH_TOKEN_KEY
+    );
 
-  // Check sif
-  useEffect(() =>{
-    const tokenValue = localStorage.getItem(LOCALSTORAGE_TOKEN_AUTH_KEY);
-    const refreshTokenValue = localStorage.getItem(LOCALSTORAGE_REFRESH_TOKEN_KEY);
+    let isValidTokenAuth = false;
+    let isValidRefreshToken = false;
 
-/*
-    const tokensVerifications = async () => {
-      let isValid = false;
+    (async function useEffectInner() {
+      if (tokenAuthValue && refreshTokenValue){
+        const verifyResponse = await verifyTokenMutation(
+          { variables: { token: tokenAuthValue }}
+        );
+        isValidTokenAuth = verifyResponse.data.success;
 
+        if (isValidTokenAuth){
+          flagUserAsAuthenticated();
 
-      if (tokenValue){
-        const verifyResponse = await verifyToken({ variables: { token: tokenValue }});
+          console.log("User successfully logged in");  // DEBUG: to be removed
 
-        if (verifyResponse.data.success === true){
-          isValid = true;
-          console.log("tokenAuth valid");
-        }
-      }
-
-      if (!isValid && refreshTokenValue){
-        const refreshResponse = await refreshToken({ variables: {refreshToken: refreshTokenValue }});
-
-        if (refreshResponse.data.success === true){
-          isValid = true;
-          console.log("refreshToken valid");
-        }
-      }
-
-
-      if (isValid){
-        localStorage.setItem(LOCALSTORAGE_TOKEN_AUTH_KEY, refreshResponse.data.refreshToken.token);
-        localStorage.setItem(LOCALSTORAGE_REFRESH_TOKEN_KEY, refreshResponse.data.refreshToken.refreshToken);
-      }
-    }
-    */
-
-
-
-
-    let refreshResponse;
-
-    if (tokenValue){
-      (async function useEffectInner() {
-        const verifyResponse = await verifyToken({ variables: { token: tokenValue }});
-        if (verifyResponse.data.success === false) {
-          localStorage.clear();
-          setIsAuthenticated(false);
-          setInitialLoading(false);
-          return null;
         } else {
-          const refreshResponse = await refreshTokenMutation({ variables: { refreshToken: refreshTokenValue }});
-          if (refreshResponse.data.success === false){
-            throw new Error(refreshResponse.data.errors);
+          isValidRefreshToken = tokensRenewal(refreshTokenValue);
+          if (isValidRefreshToken) {
+            flagUserAsAuthenticated();
+
+            console.log("User successfully logged in");  // DEBUG: to be removed
           }
+        }
+      } else {
+        tokensClear();
+        console.log("tokenAuth and/or refreshToken not found");  // DEBUG: to be removed
+      }
+    }())
+  }, [
+    flagUserAsAuthenticated,
+    tokensClear,
+    tokensRenewal,
+    verifyTokenMutation,
+  ]);
 
-          localStorage.setItem(LOCALSTORAGE_TOKEN_AUTH_KEY, refreshResponse.data.refreshToken.token);
-          localStorage.setItem(LOCALSTORAGE_REFRESH_TOKEN_KEY, refreshResponse.data.refreshToken.refreshToken);
 
-          setIsAuthenticated(true);
-          setInitialLoading(false);
-        }})()
-    } else {
-      setIsAuthenticated(false);
-      setInitialLoading(false);
-    }
-  }, [verifyToken, refreshTokenMutation, isAuthenticated]);
-
+  // Conditional renders
 
   if (initialLoading) return <h1>loading...initialLoading</h1>;
   if (isAuthenticated) return children;
