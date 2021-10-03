@@ -13,7 +13,19 @@ export const TestQueries = () => {
       Me: { dataMe.me ? dataMe.me.username : "Unauthenticated" }
       <br />
       Users: { dataUsers.users.edges.map(user => <span key={ user.node.id }>{ user.node.username }{ dataUsers.users.edges.length > 1 ? ", ": "" }</span>) }
+      <br />
+      <LogoutButton/>
     </div>
     </>
   );
+}
+
+export const LogoutButton = () => {
+  return (
+    <button onClick={() => {
+      localStorage.clear()
+      window.location.href = window.location.href;
+      console.log(window.location.href);
+    }}>LOGOUT</button>
+  )
 }

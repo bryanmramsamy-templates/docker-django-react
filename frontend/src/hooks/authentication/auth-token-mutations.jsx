@@ -45,3 +45,18 @@ export const REFRESH_TOKEN_MUTATION = gql`
     }
   }
 `
+
+
+/**
+ * Mutation which revoke a refreshToken.
+ * Must be used when a new refreshToken has been generated.
+ */
+export const REVOKE_TOKEN_MUTATION = gql`
+  mutation revokeTokenMutation($refreshToken: String!){
+    revokeToken(refreshToken: $refreshToken){
+      revoked,
+      success,
+      errors,
+    }
+  }
+`
