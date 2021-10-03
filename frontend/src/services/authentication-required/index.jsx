@@ -18,7 +18,7 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
 export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   // Authentication mutations
 
-  const [tokenAuth] = useMutation(TOKEN_AUTH_MUTATION);
+  const [tokenAuthMutation] = useMutation(TOKEN_AUTH_MUTATION);
   const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
@@ -143,11 +143,13 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
     let isValidRefreshToken = false;
 
     (async function useEffectInner() {
-      if (tokenAuthValue && refreshTokenValue){
-        const verifyResponse = await verifyTokenMutation(
-          { variables: { token: tokenAuthValue }}
-        );
-        isValidTokenAuth = verifyResponse.data.success;
+      if (refreshTokenValue){
+        if (tokenAuthValue) {
+          const verifyResponse = await verifyTokenMutation(
+            { variables: { token: tokenAuthValue }}
+          );
+          isValidTokenAuth = verifyResponse.data.success;
+        }
 
         if (isValidTokenAuth){
           flagUserAsAuthenticated();
@@ -189,7 +191,7 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
           (event) => {
             event.preventDefault();
             setInitialLoading(true);
-            tokenAuth({variables:{username, password,}})
+            tokenAuthMutation({variables:{username, password,}})
               .then(response => {
                 const { token, refreshToken, errors } = response.data.tokenAuth
                 if (!errors) {
