@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from pathlib import Path
 
 
@@ -148,7 +149,8 @@ GRAPHENE = {
 }
 
 # Cross-Origin Resources Sharing whitelist
-# Add CORS_ORIGIN_WHITELIST to allow these domains be authorized to make cross-site HTTP requests
+# Add CORS_ORIGIN_WHITELIST to allow these domains be authorized to make
+# ross-site HTTP requests
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
@@ -183,6 +185,8 @@ GRAPHQL_JWT = {
     ],
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+    "JWT_EXPIRATION_DELTA": timedelta(minutes=5),
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
 }
 
 

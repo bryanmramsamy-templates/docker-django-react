@@ -13,7 +13,7 @@ function App() {
           <Route path="/q">
             <h1>Not protected</h1>
           </Route>
-          <AuthenticationRequired tokenRefreshInterval={ 1000 * 20 }>
+          <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
               <Route path="/t">
                 <h1>Protected</h1>
               </Route>
