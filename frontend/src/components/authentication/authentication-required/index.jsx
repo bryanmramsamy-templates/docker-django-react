@@ -76,7 +76,7 @@ const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   /**
    * Renew both tokenAuth and refreshToken if the current refreshToken is valid.
    * Revoke the previous refreshToken when a new one is renewed.
-   * @param {String} currentRefreshToken Current refreshToken to check
+   * @param {string} currentRefreshToken Current refreshToken to check
    * @return {boolean} True if both tokens successfully renewed
    */
   const tokensRenewal = useCallback(async (currentRefreshToken) => {

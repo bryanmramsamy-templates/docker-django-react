@@ -2,21 +2,18 @@ import React, { useState } from 'react';
 import { useMutation } from "@apollo/client";
 
 import {
-  LOCALSTORAGE_TOKEN_AUTH_KEY,
-  LOCALSTORAGE_REFRESH_TOKEN_KEY,
- } from '../authentication-required';
-
-import {
   TOKEN_AUTH_MUTATION
 } from '../../../api/authentication/auth-token-mutations';
+
+import { login } from '../../../utils/authentication';
 
 
 /**
  * Login form
- * @param {function} flagUserAsAuthenticated Flags the user as authenticated
- * @param {function} setAuthenticationLoading Change the Authentication loading
+ * @param {Function} flagUserAsAuthenticated Flags the user as authenticated
+ * @param {Function} setAuthenticationLoading Change the Authentication loading
  * state
- * @param {function} tokensClear Clear the localStorage and flags the user as
+ * @param {Function} tokensClear Clear the localStorage and flags the user as
  * unauthenticated to log one out
  * @return Login form
  */
@@ -39,42 +36,21 @@ const LoginForm  = ({
   // Event handle functions
 
   /**
-   * Generates a new tokenAuth and a refreshToken to store in localStorage if
-   * the user enters the right credentials in the login form. Sign the user out
-   * and clear localStorage from all tokens otherwise.
+   * Prevent the default submit behavior and log the user in if the right
+   * credentials are submitted.
    * @param {Object} event Form submit event
    */
   const handleOnSubmit = (event) => {
     event.preventDefault();
 
-    setAuthenticationLoading(true);
-
-    tokenAuthMutation({ variables: { username, password }})
-      .then(response => {
-        const { token, refreshToken, errors } = response.data.tokenAuth;
-        if (!errors) {
-          localStorage.setItem(LOCALSTORAGE_TOKEN_AUTH_KEY, token);
-          localStorage.setItem(LOCALSTORAGE_REFRESH_TOKEN_KEY, refreshToken);
-
-          flagUserAsAuthenticated();
-
-        } else {
-          console.log(errors);
-          window.alert(errors.nonFieldErrors.map(
-            nonFieldError => nonFieldError.message
-          ));
-
-          tokensClear();
-
-        }
-      }).catch(e => {
-        console.log(e);  // DEBUG: Must be removed
-        window.alert("An error has occurred");
-
-        tokensClear();
-
-        throw e;
-      })
+    login(
+      username,
+      password,
+      flagUserAsAuthenticated,
+      setAuthenticationLoading,
+      tokenAuthMutation,
+      tokensClear
+    );
   };
 
 

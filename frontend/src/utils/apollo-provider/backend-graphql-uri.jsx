@@ -4,7 +4,7 @@ const backendServicePort = process.env.REACT_APP_BACKEND_SERVICE_PORT;
 
 /**
  * Get the backend URI based on the given environment variables
- * @return {String} Backend URI
+ * @return {string} Backend URI
  */
 export const getBackendUri = () => {
   let uri;
@@ -23,6 +23,6 @@ export const getBackendUri = () => {
 
 /**
  * Get the GraphQL API URI
- * @returns {String} GraphQL API URI
+ * @returns {string} GraphQL API URI
  */
 export const getGraphQLUri = () => getBackendUri() + "/graphql/";
