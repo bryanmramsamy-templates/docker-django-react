@@ -1,7 +1,8 @@
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import './app.css';
-import { AuthenticationRequired } from "./services/authentication-required";
+import AuthenticationRequired
+  from "./components/authentication/authentication-required";
 import { TestQueries } from "./test-query";
 
 function App() {

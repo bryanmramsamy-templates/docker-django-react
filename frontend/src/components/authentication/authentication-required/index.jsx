@@ -4,9 +4,9 @@ import { useMutation } from "@apollo/client";
 import {
   REFRESH_TOKEN_MUTATION,
   REVOKE_TOKEN_MUTATION,
-  TOKEN_AUTH_MUTATION,
   VERIFY_TOKEN_MUTATION
-} from '../../hooks/authentication/auth-token-mutations';
+} from '../../../api/authentication/auth-token-mutations';
+import LoginForm from '../login-form';
 
 
 const appName = process.env.REACT_APP_NAME;
@@ -15,10 +15,9 @@ export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ appName }.tokenAuth`;
 export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
 
 
-export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
+const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   // Authentication mutations
 
-  const [tokenAuthMutation] = useMutation(TOKEN_AUTH_MUTATION);
   const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
@@ -26,10 +25,8 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
 
   // States
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [authenticationLoading, setAuthenticationLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
 
 
   // CallBacks
@@ -41,8 +38,8 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   const tokensClear = useCallback(() => {
     localStorage.clear();
 
+    setAuthenticationLoading(false);
     setIsAuthenticated(false);
-    setInitialLoading(false);
 
     console.log("User has been signed out");  // DEBUG: to be removed
   }, []);
@@ -51,8 +48,8 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
    * Flag the user as authenticated.
    */
   const flagUserAsAuthenticated = useCallback(() => {
+    setAuthenticationLoading(false);
     setIsAuthenticated(true);
-    setInitialLoading(false);
   }, []);
 
   /**
@@ -179,42 +176,25 @@ export const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
 
   // Conditional renders
 
-  if (initialLoading) return <h1>loading...initialLoading</h1>;
-  if (isAuthenticated) return children;
+  if (authenticationLoading) {
+    return <h1>Please wait...</h1>;  // TODO: Insert loading component here
 
-  return (
-    <div className="AuthenticationRequired">
-      <form>
-        <input type="text" name="username" id="username" value={ username } onChange={ (event) => setUsername(event.target.value) } />
-        <input type="password" name="password" id="password" value={ password } onChange={ (event) => setPassword(event.target.value)}/>
-        <input type="submit" value="submit" onClick={
-          (event) => {
-            event.preventDefault();
-            setInitialLoading(true);
-            tokenAuthMutation({variables:{username, password,}})
-              .then(response => {
-                const { token, refreshToken, errors } = response.data.tokenAuth
-                if (!errors) {
-                  localStorage.setItem(LOCALSTORAGE_TOKEN_AUTH_KEY, token)
-                  localStorage.setItem(LOCALSTORAGE_REFRESH_TOKEN_KEY, refreshToken)
-                  setInitialLoading(false)
-                  setIsAuthenticated(true)
-                } else {
-                  console.log(errors);
-                  window.alert(errors.nonFieldErrors.map(nonFieldError => nonFieldError.message))
-                  localStorage.clear();
-                  setInitialLoading(false);
-                  setIsAuthenticated(false)
-                }
-              }).catch(reason => {
-                window.alert("ERROR", reason)
-                setInitialLoading(false)
-                setIsAuthenticated(false)
-                throw reason
-              })
-          }
-        }/>
-      </form>
-    </div>
-  );
+  } else if (isAuthenticated) {
+    return children;
+
+  } else {
+    return (
+      <div className="AuthenticationRequired">
+        <LoginForm
+          setAuthenticationLoading={ setAuthenticationLoading }
+          setIsAuthenticated={ setIsAuthenticated }
+          tokensClear={ tokensClear }
+          flagUserAsAuthenticated={ flagUserAsAuthenticated }
+        />
+      </div>
+    );
+  }
 }
+
+
+export default AuthenticationRequired;
