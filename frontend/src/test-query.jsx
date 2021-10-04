@@ -1,4 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
+import LogoutButton from "./components/authentication/logout-button";
 
 
 export const TestQueries = () => {
@@ -18,14 +19,4 @@ export const TestQueries = () => {
     </div>
     </>
   );
-}
-
-export const LogoutButton = () => {
-  return (
-    <button onClick={() => {
-      localStorage.clear()
-      window.location.href = window.location.href;
-      console.log(window.location.href);
-    }}>LOGOUT</button>
-  )
 }

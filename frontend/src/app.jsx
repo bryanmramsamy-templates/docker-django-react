@@ -5,7 +5,7 @@ import UnprotectedRoutes from "./routes/unprotected-routes";
 
 import AuthenticationRequired
   from "./components/authentication/authentication-required";
-import { TestQueries } from "./test-query";
+import BaseContainer from "./components/base-container";
 
 import './app.css';
 
@@ -18,11 +18,15 @@ const App = () => {
   return (
     <div className="App">
       <BrowserRouter>
-        <TestQueries/>
-        <UnprotectedRoutes />
-        <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
-          <ProtectedRoutes />
-        </AuthenticationRequired>
+        <BaseContainer>
+
+          <UnprotectedRoutes />
+
+          <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
+            <ProtectedRoutes />
+          </AuthenticationRequired>
+
+        </BaseContainer>
       </BrowserRouter>
     </div>
   );
