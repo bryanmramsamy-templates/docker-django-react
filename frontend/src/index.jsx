@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom';
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 
-import './index.css';
-
 import App from './app';
+
 import {
   LOCALSTORAGE_TOKEN_AUTH_KEY
 } from './components/authentication/authentication-required';
@@ -13,9 +12,19 @@ import {
 import reportWebVitals from './utils/reportWebVitals';
 import { getGraphQLUri } from './utils/apollo-provider/backend-graphql-uri';
 
+import './index.css';
+
 
 const tokenAuth = localStorage.getItem(LOCALSTORAGE_TOKEN_AUTH_KEY);
 
+
+/**
+ * Define the default ApolloClient.
+ *
+ * Use the GraphQL URI based on the domain name, inject the Authorization header
+ * with tokenAuth stored in localStorage if found and define the local memory as
+ * cache.
+ */
 const client = new ApolloClient({
   uri: getGraphQLUri(),
   headers: {

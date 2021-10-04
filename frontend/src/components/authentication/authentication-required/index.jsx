@@ -6,15 +6,36 @@ import {
   REVOKE_TOKEN_MUTATION,
   VERIFY_TOKEN_MUTATION
 } from '../../../api/authentication/auth-token-mutations';
+
 import LoginForm from '../login-form';
 
 
 const appName = process.env.REACT_APP_NAME;
 
+
+// Token keys
+
 export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ appName }.tokenAuth`;
 export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
 
 
+/**
+ * Wrapper that contains all the protected content which must only be visible by
+ * authenticated users.
+ *
+ * If the user has a valid refreshToken, a tokenAuth and a new refreshToken will
+ * be generated, stored in localStorage and renewed at a regular interval as
+ * long as the user has a valid refreshToken in one's localStorage.
+ *
+ * Each refreshToken is revoked once a new one is generated.
+ *
+ * If the refreshToken is missing or is not valid, a login form will be rendered
+ * instead of the protected content.
+ * @param {*} children Children protected components
+ * @param {int} tokenRefreshInterval Tokens renew interval in milliseconds
+ * @return The protected content if the user is authenticated, otherwise a login
+ * form
+ */
 const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
   // Authentication mutations
 
@@ -186,10 +207,9 @@ const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
     return (
       <div className="AuthenticationRequired">
         <LoginForm
-          setAuthenticationLoading={ setAuthenticationLoading }
-          setIsAuthenticated={ setIsAuthenticated }
-          tokensClear={ tokensClear }
           flagUserAsAuthenticated={ flagUserAsAuthenticated }
+          setAuthenticationLoading={ setAuthenticationLoading }
+          tokensClear={ tokensClear }
         />
       </div>
     );

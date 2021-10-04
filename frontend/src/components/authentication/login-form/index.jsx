@@ -11,11 +11,19 @@ import {
 } from '../../../api/authentication/auth-token-mutations';
 
 
+/**
+ * Login form
+ * @param {function} flagUserAsAuthenticated Flags the user as authenticated
+ * @param {function} setAuthenticationLoading Change the Authentication loading
+ * state
+ * @param {function} tokensClear Clear the localStorage and flags the user as
+ * unauthenticated to log one out
+ * @return Login form
+ */
 const LoginForm  = ({
-  setInitialLoading,
-  setIsAuthenticated,
-  tokensClear,
   flagUserAsAuthenticated,
+  setAuthenticationLoading,
+  tokensClear,
 }) => {
   // Authentication mutation
 
@@ -30,10 +38,16 @@ const LoginForm  = ({
 
   // Event handle functions
 
+  /**
+   * Generates a new tokenAuth and a refreshToken to store in localStorage if
+   * the user enters the right credentials in the login form. Sign the user out
+   * and clear localStorage from all tokens otherwise.
+   * @param {Object} event Form submit event
+   */
   const handleOnSubmit = (event) => {
     event.preventDefault();
 
-    setInitialLoading(true);
+    setAuthenticationLoading(true);
 
     tokenAuthMutation({ variables: { username, password }})
       .then(response => {
@@ -63,12 +77,28 @@ const LoginForm  = ({
       })
   };
 
+
+  // TODO: Create a custom login form
   return (
-    <form>
-      <input type="text" name="username" id="username" value={ username } onChange={ (event) => setUsername(event.target.value) } />
-      <input type="password" name="password" id="password" value={ password } onChange={ (event) => setPassword(event.target.value)}/>
-      <input type="submit" value="submit" onClick={ handleOnSubmit }/>
-    </form>
+    <div className="LoginForm">
+      <h2>
+        Login
+      </h2>
+      <form>
+        <label htmlFor="username">Username:</label>
+
+        <input type="text" name="username" id="username" value={ username }
+          onChange={ (event) => setUsername(event.target.value) } />
+        <br />
+
+        <label htmlFor="password">Password:</label>
+        <input type="password" name="password" id="password" value={ password }
+          onChange={ (event) => setPassword(event.target.value)}/>
+        <br />
+
+        <input type="submit" value="Sign in" onClick={ handleOnSubmit }/>
+      </form>
+    </div>
   );
 }
 
