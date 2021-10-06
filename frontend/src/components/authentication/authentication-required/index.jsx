@@ -7,7 +7,7 @@ import {
   VERIFY_TOKEN_MUTATION
 } from '../../../api/authentication/auth-token-mutations';
 
-import LoginForm from '../login-form';
+import LoginForm from './login-form';
 
 
 const appName = process.env.REACT_APP_NAME;

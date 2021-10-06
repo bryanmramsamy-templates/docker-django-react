@@ -1,5 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
-import LogoutButton from "./components/authentication/logout-button";
+import LogoutButton from "./components/authentication/authentication-required/logout-button";
 
 
 export const TestQueries = () => {
