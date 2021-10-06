@@ -38,7 +38,7 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  * form
  */
 const AuthenticationRequired = ({
-  children, tokenRefreshInterval=1000 * 60 * 4 }) => {
+  children, tokenRefreshInterval = 1000 * 60 * 4 }) => {
   // Authentication mutations
 
   const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
@@ -63,8 +63,6 @@ const AuthenticationRequired = ({
 
     setAuthenticationLoading(false);
     setIsAuthenticated(false);
-
-    console.log("User has been signed out");  // DEBUG: to be removed
   }, []);
 
   /**
@@ -103,16 +101,11 @@ const AuthenticationRequired = ({
         { refreshToken: currentRefreshToken }
       })
 
-      if (revokeTokenResponse.data.revokeToken.success) {
-        hasSucceeded = true;
-        console.log("Tokens successfully refreshed");  // DEBUG: to be removed
-      }
+      revokeTokenResponse.data.revokeToken.success ?
+        hasSucceeded = true : hasSucceeded = false;
     }
 
-    if (!hasSucceeded) {  // FIXME: ternary
-      tokensClear()
-      console.log("Token has not successfully been refreshed");  // DEBUG: to be removed
-    }
+    if (!hasSucceeded) tokensClear();
 
     return hasSucceeded;
   }, [refreshTokenMutation, revokeTokenMutation, tokensClear]);
@@ -133,12 +126,9 @@ const AuthenticationRequired = ({
 
         if (!refreshTokenValue) {
           tokensClear();
-          console.log("No refreshToken found");  // DEBUG: to be removed
           return null;
 
-        } else {
-          tokensRenewal(refreshTokenValue);
-        }
+        } else tokensRenewal(refreshTokenValue);
       }())
     }, tokenRefreshInterval);
 
@@ -171,23 +161,14 @@ const AuthenticationRequired = ({
           isValidTokenAuth = verifyResponse.data.success;
         }
 
-        if (isValidTokenAuth){
-          flagUserAsAuthenticated();
+        if (isValidTokenAuth) flagUserAsAuthenticated();
 
-          console.log("User successfully logged in");  // DEBUG: to be removed
-
-        } else {
+        else {
           isValidRefreshToken = tokensRenewal(refreshTokenValue);
-          if (isValidRefreshToken) {
-            flagUserAsAuthenticated();
-
-            console.log("User successfully logged in");  // DEBUG: to be removed
-          }
+          if (isValidRefreshToken) flagUserAsAuthenticated();
         }
-      } else {
-        tokensClear();
-        console.log("tokenAuth and/or refreshToken not found");  // DEBUG: to be removed
-      }
+
+      } else tokensClear();
     }())
   }, [
     flagUserAsAuthenticated,
