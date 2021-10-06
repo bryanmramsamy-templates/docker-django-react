@@ -1,4 +1,4 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import ProtectedRoutes from "./routes/protected-routes";
 import UnprotectedRoutes from "./routes/unprotected-routes";
@@ -19,13 +19,19 @@ const App = () => {
     <div className="App">
       <BrowserRouter>
         <BaseContainer>
+          <Switch>
 
-          <UnprotectedRoutes />
+            <Route path="/home">  {/* TODO: Change path name */}
+              <UnprotectedRoutes />
+            </Route>
 
-          <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
-            <ProtectedRoutes />
-          </AuthenticationRequired>
+            <Route path="/protected">  {/* TODO: Change path name */}
+              <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
+                <ProtectedRoutes/>
+              </AuthenticationRequired>
+            </Route>
 
+          </Switch>
         </BaseContainer>
       </BrowserRouter>
     </div>

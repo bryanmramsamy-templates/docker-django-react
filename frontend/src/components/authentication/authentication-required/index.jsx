@@ -32,11 +32,13 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  * If the refreshToken is missing or is not valid, a login form will be rendered
  * instead of the protected content.
  * @param {*} children Children protected components
- * @param {int} tokenRefreshInterval Tokens renew interval in milliseconds
+ * @param {int} tokenRefreshInterval Tokens renew interval in milliseconds.
+ * Default value is set to 4 minutes.
  * @return The protected content if the user is authenticated, otherwise a login
  * form
  */
-const AuthenticationRequired = ({ children, tokenRefreshInterval }) => {
+const AuthenticationRequired = ({
+  children, tokenRefreshInterval=1000 * 60 * 4 }) => {
   // Authentication mutations
 
   const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, useRouteMatch } from "react-router-dom";
 
 
 /**
@@ -7,11 +7,19 @@ import { Route, Switch } from "react-router-dom";
  * @return All the protected routes.
  */
 const ProtectedRoutes = () => {
+  const { path } = useRouteMatch();
+
   return (
     <Switch>
-      <Route path="/protected">
+
+      <Route path={ path + "/1" }>
         <h1>Protected page</h1>  {/* TODO: Put the protected pages here */}
       </Route>
+
+      <Route path={ path + "/2" }>
+        <h1>Protected page 2</h1>  {/* TODO: Put the protected pages here */}
+      </Route>
+
     </Switch>
   );
 }

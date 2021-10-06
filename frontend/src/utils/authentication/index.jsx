@@ -67,7 +67,7 @@ export const login = (
  */
 export const logout = async(revokeTokenMutation) => {
   const refreshToken = localStorage.getItem(LOCALSTORAGE_REFRESH_TOKEN_KEY);
-  await revokeTokenMutation({ variables: { refreshToken }});
+  if (refreshToken) await revokeTokenMutation({ variables: { refreshToken }});
 
   localStorage.clear();
   window.location.reload();

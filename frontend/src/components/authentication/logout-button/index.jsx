@@ -15,7 +15,7 @@ import { logout } from '../../../utils/authentication';
 const LogoutButton = () => {
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
 
-  const handleOnLogout = async() => {
+  const handleOnLogout = () => {
     logout(revokeTokenMutation);
   }
 
