@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import ProtectedRoutes from "./routes/protected-routes";
@@ -15,10 +16,13 @@ import './app.css';
  * @return The main components of the app
  */
 const App = () => {
+  const [userIsAuthenticated, setUserIsAuthenticated] = useState(false);
+
+
   return (
     <div className="App">
       <BrowserRouter>
-        <BaseContainer>
+        <BaseContainer userIsAuthenticated={ userIsAuthenticated }>
           <Switch>
 
             <Route path="/home">  {/* TODO: Change path name */}
@@ -26,7 +30,10 @@ const App = () => {
             </Route>
 
             <Route path="/protected">  {/* TODO: Change path name */}
-              <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
+              <AuthenticationRequired
+                tokenRefreshInterval={ 1000 * 60 * 4 }
+                setUserIsAuthenticated={ setUserIsAuthenticated }
+                userIsAuthenticated={ userIsAuthenticated }>
                 <ProtectedRoutes/>
               </AuthenticationRequired>
             </Route>

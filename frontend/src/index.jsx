@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { ApolloClient, ApolloProvider, createHttpLink, InMemoryCache } from "@apollo/client";
+import { setContext } from '@apollo/client/link/context';
 
 import App from './app';
 
@@ -15,23 +16,39 @@ import { getGraphQLUri } from './utils/apollo-provider/backend-graphql-uri';
 import './index.css';
 
 
-const tokenAuth = localStorage.getItem(LOCALSTORAGE_TOKEN_AUTH_KEY);
+/**
+ * ApolloClient link which define the backend URI
+ */
+const httpLink = createHttpLink({
+  uri: getGraphQLUri(),
+});
 
 
 /**
- * Define the default ApolloClient.
- *
- * Use the GraphQL URI based on the domain name, inject the Authorization header
- * with tokenAuth stored in localStorage if found and define the local memory as
- * cache.
+ * ApolloClient link which get the authentication token from the localStorage
+ * if it exists.
+ * @return The headers to the context so the httpLink can read them
+ */
+const authLink = setContext((_, { headers }) => {
+  const authToken = localStorage.getItem(LOCALSTORAGE_TOKEN_AUTH_KEY);
+
+  return {
+    headers: {
+      ...headers,
+      authorization: authToken ? `JWT ${ authToken }` : "",
+    }
+  }
+});
+
+
+/**
+ * ApolloClient definition which uses the httpLink and authLink. Also defines
+ * the local memory as cache.
  */
 const client = new ApolloClient({
-  uri: getGraphQLUri(),
-  headers: {
-    Authorization: tokenAuth ? `JWT ${ tokenAuth }` : ""
-  },
-  cache: new InMemoryCache(),
-})
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
 
 
 ReactDOM.render(

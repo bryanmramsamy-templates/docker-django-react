@@ -34,11 +34,17 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  * @param {*} children Children protected components
  * @param {int} tokenRefreshInterval Tokens renew interval in milliseconds.
  * Default value is set to 4 minutes.
+ * @param {Function} setUserIsAuthenticated Set user authentication status.
+ * @param {boolean} userIsAuthenticated True if the user is authenticated.
  * @return The protected content if the user is authenticated, otherwise a login
  * form
  */
 const AuthenticationRequired = ({
-  children, tokenRefreshInterval = 1000 * 60 * 4 }) => {
+  children,
+  tokenRefreshInterval = 1000 * 60 * 4 ,
+  setUserIsAuthenticated,
+  userIsAuthenticated
+}) => {
   // Authentication mutations
 
   const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
@@ -46,10 +52,9 @@ const AuthenticationRequired = ({
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
 
 
-  // States
+  // State
 
   const [authenticationLoading, setAuthenticationLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
 
   // CallBacks
@@ -62,16 +67,16 @@ const AuthenticationRequired = ({
     localStorage.clear();
 
     setAuthenticationLoading(false);
-    setIsAuthenticated(false);
-  }, []);
+    setUserIsAuthenticated(false);
+  }, [setUserIsAuthenticated]);
 
   /**
    * Flag the user as authenticated.
    */
   const flagUserAsAuthenticated = useCallback(() => {
     setAuthenticationLoading(false);
-    setIsAuthenticated(true);
-  }, []);
+    setUserIsAuthenticated(true);
+  }, [setUserIsAuthenticated]);
 
   /**
    * Renew both tokenAuth and refreshToken if the current refreshToken is valid.
@@ -183,7 +188,7 @@ const AuthenticationRequired = ({
   if (authenticationLoading) {
     return <h1>Please wait...</h1>;  // TODO: Insert loading component here
 
-  } else if (isAuthenticated) {
+  } else if (userIsAuthenticated) {
     return children;
 
   } else {
