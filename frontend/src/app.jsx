@@ -1,25 +1,49 @@
-import logo from './media/logo/logo.svg';
+import React, { useState } from 'react';
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+
+import ProtectedRoutes from "./routes/protected-routes";
+import UnprotectedRoutes from "./routes/unprotected-routes";
+
+import AuthenticationRequired
+  from "./components/authentication/authentication-required";
+import BaseContainer from "./components/base-container";
+
 import './app.css';
 
-function App() {
+
+/**
+ * Renders the main components of the app
+ * @return The main components of the app
+ */
+const App = () => {
+  const [userIsAuthenticated, setUserIsAuthenticated] = useState(false);
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <BrowserRouter>
+        <BaseContainer userIsAuthenticated={ userIsAuthenticated }>
+          <Switch>
+
+            <Route path="/home">  {/* TODO: Change path name */}
+              <UnprotectedRoutes />
+            </Route>
+
+            <Route path="/protected">  {/* TODO: Change path name */}
+              <AuthenticationRequired
+                tokenRefreshInterval={ 1000 * 60 * 4 }
+                setUserIsAuthenticated={ setUserIsAuthenticated }
+                userIsAuthenticated={ userIsAuthenticated }>
+                <ProtectedRoutes/>
+              </AuthenticationRequired>
+            </Route>
+
+          </Switch>
+        </BaseContainer>
+      </BrowserRouter>
     </div>
   );
 }
+
 
 export default App;
