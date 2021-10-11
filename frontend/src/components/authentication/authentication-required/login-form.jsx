@@ -8,6 +8,16 @@ import {
 import { login } from '../../../utils/authentication';
 
 
+// NOTE: This is an example component !
+
+/*
+ * flagUserAsAuthenticated, setAuthenticationLoading and tokensClear are
+ * required props.
+ * tokenAuthMutation is a required mutation.
+ * username and password are required states.
+ * login is a required callback.
+ */
+
 /**
  * Login form
  * @param {Function} flagUserAsAuthenticated Flags the user as authenticated

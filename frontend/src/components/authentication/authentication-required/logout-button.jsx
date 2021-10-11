@@ -8,6 +8,15 @@ import {
 import { logout } from '../../../utils/authentication';
 
 
+// NOTE: This is an example component !
+
+/*
+ * flagUserAsAuthenticated, setAuthenticationLoading and tokensClear are
+ * required props.
+ * revokeTokenMutation is a required mutation.
+ * logout is a required callback.
+ */
+
 /**
  * Logout button
  * @return Logout button
