@@ -1,4 +1,4 @@
-import { Route, Routes, useMatch } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 
 /**
@@ -6,17 +6,17 @@ import { Route, Routes, useMatch } from "react-router-dom";
  * @return All the protected routes.
  */
 const ProtectedRoutes = () => {
-  const { path } = useMatch();
-
   return (
     <Routes>
-      <Route path={ path + "/1" }>
-        <h1>Protected page</h1>  {/* TODO: Put the protected pages here */}
-      </Route>
+      <Route
+        path="1"  // TODO: Put the protected pages here
+        element={ <h1>Protected page</h1> }
+      />
 
-      <Route path={ path + "/2" }>
-        <h1>Protected page 2</h1>  {/* TODO: Put the protected pages here */}
-      </Route>
+      <Route
+        path="2"  // TODO: Put the protected pages here
+        element={ <h1>Protected page 2</h1> }
+      />
     </Routes>
   );
 }
