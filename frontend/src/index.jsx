@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ApolloClient, ApolloProvider, createHttpLink, InMemoryCache } from "@apollo/client";
+import { ApolloClient, ApolloProvider, createHttpLink, InMemoryCache }
+  from "@apollo/client";
 import { setContext } from '@apollo/client/link/context';
 
 import App from './app';
@@ -12,8 +13,6 @@ import {
 
 import reportWebVitals from './utils/reportWebVitals';
 import { getGraphQLUri } from './utils/apollo-provider/backend-graphql-uri';
-
-import './index.css';
 
 
 /**

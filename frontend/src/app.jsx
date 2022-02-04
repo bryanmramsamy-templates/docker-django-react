@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import ProtectedRoutes from "./routes/protected-routes";
 import UnprotectedRoutes from "./routes/unprotected-routes";
@@ -7,8 +7,6 @@ import UnprotectedRoutes from "./routes/unprotected-routes";
 import AuthenticationRequired
   from "./components/authentication/authentication-required";
 import BaseContainer from "./components/base-container";
-
-import './app.css';
 
 
 /**
@@ -23,7 +21,7 @@ const App = () => {
     <div className="App">
       <BrowserRouter>
         <BaseContainer userIsAuthenticated={ userIsAuthenticated }>
-          <Switch>
+          <Routes>
 
             <Route path="/home">  {/* TODO: Change path name */}
               <UnprotectedRoutes />
@@ -38,7 +36,7 @@ const App = () => {
               </AuthenticationRequired>
             </Route>
 
-          </Switch>
+          </Routes>
         </BaseContainer>
       </BrowserRouter>
     </div>

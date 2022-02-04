@@ -1,5 +1,4 @@
-import React from 'react';
-import { Route, Switch, useRouteMatch } from "react-router-dom";
+import { Route, Routes, useMatch } from "react-router-dom";
 
 
 /**
@@ -7,11 +6,10 @@ import { Route, Switch, useRouteMatch } from "react-router-dom";
  * @return All the unprotected routes.
  */
 const UnprotectedRoutes = () => {
-  const { path } = useRouteMatch();
+  const { path } = useMatch();
 
   return (
-    <Switch>
-
+    <Routes>
       <Route path={ path + "/1" }>
         <h1>Home page</h1>  {/* TODO: Put the unprotected home page here */}
       </Route>
@@ -19,8 +17,7 @@ const UnprotectedRoutes = () => {
       <Route path={ path + "/2" }>
         <h1>Home page 2</h1>  {/* TODO: Put the unprotected home page here */}
       </Route>
-
-    </Switch>
+    </Routes>
   );
 }
 
