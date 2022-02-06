@@ -40,7 +40,7 @@ const LoginForm  = ({ authenticationDispatch }) => {
         authenticationDispatch.flagUserAsAuthenticated();
 
       } else {
-        // DEBUG: Error must be handled
+        // TODO: Error must be handled
         console.log(errors);
         window.alert(errors.nonFieldErrors.map(
           nonFieldError => nonFieldError.message
@@ -50,7 +50,7 @@ const LoginForm  = ({ authenticationDispatch }) => {
 
       }
     } catch (error) {
-      // DEBUG: Error must be handled
+      // TODO: Error must be handled
       console.log(error);
       window.alert("An error has occurred");
 

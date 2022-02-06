@@ -185,8 +185,12 @@ GRAPHQL_JWT = {
     ],
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-    "JWT_EXPIRATION_DELTA": timedelta(minutes=5),
-    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
+    "JWT_EXPIRATION_DELTA": timedelta(
+        minutes=int(os.environ.get("JWT_EXPIRATION_DELTA", default=5)),
+    ),
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(
+        days=int(os.environ.get("JWT_REFRESH_EXPIRATION_DELTA", default=7)),
+    )
 }
 
 

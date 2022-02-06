@@ -36,7 +36,7 @@ const LogoutButton = () => {
     localStorage.clear();
     window.location.reload();
 
-    if (errors) console.log(errors);  // DEBUG: Error must be handled
+    if (errors) console.log(errors);  // TODO: Error must be handled
   }
 
   // Handle function

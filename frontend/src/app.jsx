@@ -26,7 +26,7 @@ const App = () => {
             <Route // TODO: Change path name
               path="/protected/*"
               element={
-                <AuthenticationRequired tokenRefreshInterval={ 1000 * 60 * 4 }>
+                <AuthenticationRequired>
                   <ProtectedRoutes/>
                 </AuthenticationRequired>
               }

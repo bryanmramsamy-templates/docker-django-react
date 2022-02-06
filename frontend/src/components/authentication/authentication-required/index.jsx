@@ -11,12 +11,14 @@ import { UserAuthenticationStateContext }
 
 
 // Env variables
-const appName = process.env.REACT_APP_NAME;
-
+const APP_NAME = process.env.REACT_APP_NAME;
+const JWT_RENEW_INTERVAL
+  = 1000 * 60 * (Number(process.env.REACT_APP_JWT_EXPIRATION_DELTA) - 1);
 
 // Token keys
-export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ appName }.tokenAuth`;
-export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
+export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ APP_NAME }.tokenAuth`;
+export const LOCALSTORAGE_REFRESH_TOKEN_KEY
+  = `${ APP_NAME }.refreshToken`;
 
 /**
  * Wrapper that contains all the protected content which must only be visible by
@@ -32,12 +34,12 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  * instead of the protected content.
  * @param {Object} children Children protected components
  * @param {Number} tokenRefreshInterval Tokens renew interval in milliseconds.
- * Default value is set to 4 minutes.
+ * Default value is one minute less than the JWT_EXPIRATION_DELTA value.
  * @return The protected content if the user is authenticated, otherwise a login
  * form
  */
 const AuthenticationRequired
-  = ({ children, tokenRefreshInterval = 1000 * 60 * 4 }) => {
+  = ({ children, tokenRefreshInterval = JWT_RENEW_INTERVAL }) => {
   // Authentication mutations
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
@@ -99,7 +101,7 @@ const AuthenticationRequired
     } else errors = refreshTokenResponse.data.refreshToken.errors;
 
     if (!success){
-      // DEBUG: Error must be handled
+      // TODO: Error must be handled
       console.log(errors);
 
       tokensClear();
