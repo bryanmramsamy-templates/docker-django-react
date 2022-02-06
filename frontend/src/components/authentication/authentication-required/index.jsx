@@ -1,23 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMutation } from "@apollo/client";
 
-import {
-  REFRESH_TOKEN_MUTATION,
-  REVOKE_TOKEN_MUTATION,
-  VERIFY_TOKEN_MUTATION
-} from '../../../api/authentication/auth-token-mutations';
+import { REFRESH_TOKEN_MUTATION, REVOKE_TOKEN_MUTATION }
+  from '../../../api/authentication/auth-token-mutations';
 
 import LoginForm from './login-form';
 
 
+// Env variables
 const appName = process.env.REACT_APP_NAME;
 
 
 // Token keys
-
 export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ appName }.tokenAuth`;
 export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
-
 
 /**
  * Wrapper that contains all the protected content which must only be visible by
@@ -31,24 +27,22 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  *
  * If the refreshToken is missing or is not valid, a login form will be rendered
  * instead of the protected content.
- * @param {*} children Children protected components
- * @param {int} tokenRefreshInterval Tokens renew interval in milliseconds.
+ * @param {Object} children Children protected components
+ * @param {Number} tokenRefreshInterval Tokens renew interval in milliseconds.
  * Default value is set to 4 minutes.
  * @param {Function} setUserIsAuthenticated Set user authentication status.
- * @param {boolean} userIsAuthenticated True if the user is authenticated.
+ * @param {Boolean} userIsAuthenticated True if the user is authenticated.
  * @return The protected content if the user is authenticated, otherwise a login
  * form
  */
 const AuthenticationRequired = ({
   children,
-  tokenRefreshInterval: f = 1000 * 60 * 4 ,
+  tokenRefreshInterval = 1000 * 60 * 4,
   setUserIsAuthenticated,
   userIsAuthenticated
 }) => {
-  let tokenRefreshInterval = 10000;  // DEBUG
 
   // Authentication mutations
-  const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
 
@@ -76,108 +70,80 @@ const AuthenticationRequired = ({
   }, [setUserIsAuthenticated]);
 
   /**
-   * Renew both tokenAuth and refreshToken if the current refreshToken is valid.
-   * Revoke the previous refreshToken when a new one is renewed.
-   * @param {string} currentRefreshToken Current refreshToken to check
-   * @return {boolean} True if both tokens successfully renewed
+   * If the current user's refreshToken is valid, renew both authToken and
+   * refreshToken, then revoke previous refreshToken.
+   * @param {String} currentRefreshToken Current refreshToken to check
+   * @return {Boolean} True if both tokens successfully renewed
    */
   const tokensRenewal = useCallback(async (currentRefreshToken) => {
     let success = false;
+    let error = null;
 
     const refreshTokenResponse = await refreshTokenMutation(
         { variables: { refreshToken: currentRefreshToken }});
 
     if (refreshTokenResponse.data.refreshToken.success) {
-
       localStorage.setItem(
         LOCALSTORAGE_TOKEN_AUTH_KEY,
         refreshTokenResponse.data.refreshToken.token
       );
-
       localStorage.setItem(
         LOCALSTORAGE_REFRESH_TOKEN_KEY,
         refreshTokenResponse.data.refreshToken.refreshToken
       );
 
-      const revokeTokenResponse = await revokeTokenMutation({ variables:
-        { refreshToken: currentRefreshToken }
-      })
+      const revokeTokenResponse = await revokeTokenMutation({ variables: {
+        refreshToken: currentRefreshToken
+      }});
+      success = revokeTokenResponse.data.revokeToken.success ? true : false;
+      if(!success) error = revokeTokenResponse.data.revokeToken.error;
 
-      revokeTokenResponse.data.revokeToken.success ?
-        success = true : success = false;
+    } else error = refreshTokenResponse.data.revokeToken.error;
+
+    if (!success){
+      // DEBUG: Error must be handled
+      console.log(error);
+
+      authenticationDispatch.tokensClear();
     }
-
-    if (!success) tokensClear();
-
     return success;
-  }, [refreshTokenMutation, revokeTokenMutation, tokensClear]);
+  }, []);
 
+
+  const authenticationDispatch
+    = { tokensClear, flagUserAsAuthenticated, tokensRenewal };
 
   // Effects
-
   /**
-   * Refreshes the tokenAuth and the refreshToken, based on the current
-   * refreshToken stored in localStorage, at each interval. Clears
-   * localStorage if the current refreshToken is not found.
+   * Refresh both tokenAuth and refreshToken is user's current refreshToken is
+   * valid.
    */
   useEffect(() => {
     const interval = setInterval(() => {
-      (function loop() {
-        const refreshTokenValue = localStorage.getItem(
-          LOCALSTORAGE_REFRESH_TOKEN_KEY);
+      const refreshTokenValue = localStorage.getItem(
+        LOCALSTORAGE_REFRESH_TOKEN_KEY);
 
-        if (!refreshTokenValue) {
-          tokensClear();
-          return null;
-
-        } else tokensRenewal(refreshTokenValue);
-      }())
+      if (!refreshTokenValue) authenticationDispatch.tokensClear();
+      else authenticationDispatch.tokensRenewal(refreshTokenValue);
     }, tokenRefreshInterval);
 
     return () => clearInterval(interval);
-  }, [tokenRefreshInterval, tokensClear, tokensRenewal]);
+  }, []);
 
   /**
-   * Checks if the user has a valid tokenAuth. If the tokenAuth is not valid,
-   * tries to renew both tokenAuth and refreshToken. Flags the user as
-   * authenticated if one of these two operations succeeds, otherwise as
-   * unauthenticated followed by a localStorage clear.
+   * Set the user as authenticated if one's refreshToken is valid, otherwise
+   * clear the saved tokens.
    */
   useEffect(() => {
-    const tokenAuthValue = localStorage.getItem(
-      LOCALSTORAGE_TOKEN_AUTH_KEY
-    );
-    const refreshTokenValue = localStorage.getItem(
+    const refreshToken= localStorage.getItem(
       LOCALSTORAGE_REFRESH_TOKEN_KEY
     );
 
-    let isValidTokenAuth = false;
-    let isValidRefreshToken = false;
-
-    (async function useEffectInner() {
-      if (refreshTokenValue){
-        if (tokenAuthValue) {
-          const verifyResponse = await verifyTokenMutation(
-            { variables: { token: tokenAuthValue }}
-          );
-          isValidTokenAuth = verifyResponse.data.success;
-        }
-
-        if (isValidTokenAuth) flagUserAsAuthenticated();
-
-        else {
-          isValidRefreshToken = tokensRenewal(refreshTokenValue);
-          if (isValidRefreshToken) flagUserAsAuthenticated();
-        }
-
-      } else tokensClear();
-    }())
-  }, [
-    flagUserAsAuthenticated,
-    tokensClear,
-    tokensRenewal,
-    verifyTokenMutation,
-  ]);
+    if (refreshToken){
+      if (tokensRenewal(refreshToken))
+        authenticationDispatch.flagUserAsAuthenticated();
+    } else authenticationDispatch.tokensClear();
+  }, []);
 
 
   // Conditional renders
@@ -192,9 +158,8 @@ const AuthenticationRequired = ({
     return (
       <div className="AuthenticationRequired">
         <LoginForm
-          flagUserAsAuthenticated={ flagUserAsAuthenticated }
+          authenticationDispatch={ authenticationDispatch }
           setAuthenticationLoading={ setAuthenticationLoading }
-          tokensClear={ tokensClear }
         />
       </div>
     );

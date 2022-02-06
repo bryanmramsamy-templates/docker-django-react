@@ -32,11 +32,7 @@ export const logout = async(revokeTokenMutation) => {
  * unauthenticated to log one out
  * @return Login form
  */
-const LoginForm  = ({
-  flagUserAsAuthenticated,
-  setAuthenticationLoading,
-  tokensClear,
-}) => {
+const LoginForm  = ({ authenticationDispatch, setAuthenticationLoading }) => {
   // Authentication mutation
   const [tokenAuthMutation] = useMutation(TOKEN_AUTH_MUTATION);
 
@@ -44,36 +40,23 @@ const LoginForm  = ({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Authentication functions
   /**
-   * Generates a new tokenAuth and a refreshToken to store in localStorage if
-   * valid credentials are submitted. Otherwise sign the user out and clear
-   * localStorage from all tokens.
-   * @param {Function} setAuthenticationLoading Change the Authentication loading
-   * @param {Function} tokenAuthMutation Mutation which generates a new tokenAuth
-   * and a refreshToken if valid credentials are given. Must be called in a
-   * useMutation hook in the component which calls this function.
-   * @param {Function} tokensClear Clear the localStorage and flags the user as
-   * unauthenticated to log one out
+   * Log the user in, flag the user as authenticated and store both authToken
+   * and refreshToken if the right credentials are submitted.
    */
-  const login = async(
-    setAuthenticationLoading,
-    tokenAuthMutation,
-    tokensClear,
-  ) => {
+  const login = async() => {
     setAuthenticationLoading(true);
 
     try {
-      const response = await tokenAuthMutation({ variables: {
-        username,
-        password,
-      }});
+      const response = await tokenAuthMutation({
+        variables: { username, password }
+      });
 
       const { token, refreshToken, errors } = response.data.tokenAuth;
       if (!errors) {
         localStorage.setItem(LOCALSTORAGE_TOKEN_AUTH_KEY, token);
         localStorage.setItem(LOCALSTORAGE_REFRESH_TOKEN_KEY, refreshToken);
-        flagUserAsAuthenticated();
+        authenticationDispatch.flagUserAsAuthenticated();
 
       } else {
         // DEBUG: Error must be handled
@@ -82,7 +65,7 @@ const LoginForm  = ({
           nonFieldError => nonFieldError.message
         ));
 
-        tokensClear();
+        authenticationDispatch.tokensClear();
 
       }
     } catch (error) {
@@ -90,26 +73,22 @@ const LoginForm  = ({
       console.log(error);
       window.alert("An error has occurred");
 
-      tokensClear();
+      authenticationDispatch.tokensClear();
     };
   }
 
-
-  // Event handle functions
-
+  // Event handle function
   /**
-   * Prevent the default submit behavior and log the user in if the right
-   * credentials are submitted.
+   * Prevent the default submit behavior and log the user in.
    * @param {Object} event Form submit event
    */
   const handleOnSubmit = (event) => {
     event.preventDefault();
-
-    login(setAuthenticationLoading, tokenAuthMutation, tokensClear);
+    login();
   };
 
   // Render
-  return (  // todo: create a custom login form
+  return (  // TODO: create a custom login form
     <div className="LoginForm">
       <h2>
         Login
