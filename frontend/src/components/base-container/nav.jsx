@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useQuery } from "@apollo/client";
 
 import { ME } from "../../api/authentication/me";
 
 import LogoutButton from "../authentication/authentication-required/logout-button";
+
+import { UserAuthenticationStateContext } from '../../contexts/authentication';
 
 
 // NOTE: This is an example component !
@@ -16,35 +18,31 @@ import LogoutButton from "../authentication/authentication-required/logout-butto
 /**
  * Navigation component which gives the user information if logged in and a
  * LogoutButton component.
- * @param {boolean} userIsAuthenticated True if the user is authenticated.
  * @returns Renders the Nav component
  */
-const Nav = ({ userIsAuthenticated }) => {
+const Nav = () => {
   // Authentication query
-
   const { data, loading, errors, refetch } = useQuery(ME);
 
+  // Context
+  const userAuthenticationState = useContext(UserAuthenticationStateContext);
 
   // Effect
-
   /**
    * Refetch the user information when the authentication flag changes
    */
-  useEffect(() => refetch(), [refetch, userIsAuthenticated]);
-
+  useEffect(() => refetch(), [refetch, userAuthenticationState.isAuthenticated]);
 
   // Conditional renders
-
   if (loading) return "User is loading...";
   if (errors) console.log(errors);
-
 
   return (
     <div className="Nav">
       <br />
       { JSON.stringify(data, null, 2) }
       <br />
-      { userIsAuthenticated ? <LogoutButton/> : ""}
+      { userAuthenticationState.isAuthenticated ? <LogoutButton/> : ""}
     </div>
   )
 }

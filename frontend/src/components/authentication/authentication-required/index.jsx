@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useMutation } from "@apollo/client";
 
 import { REFRESH_TOKEN_MUTATION, REVOKE_TOKEN_MUTATION }
   from '../../../api/authentication/auth-token-mutations';
 
 import LoginForm from './login-form';
+
+import { UserAuthenticationStateContext } from '../../../contexts/authentication';
 
 
 // Env variables
@@ -49,6 +51,9 @@ const AuthenticationRequired = ({
   // State
   const [authenticationLoading, setAuthenticationLoading] = useState(true);
 
+  // Context
+  const userAuthenticationState = useContext(UserAuthenticationStateContext);
+
   // CallBacks
   /**
    * Clears the localStorage from all tokens and flags the user as
@@ -58,16 +63,16 @@ const AuthenticationRequired = ({
     localStorage.clear();
 
     setAuthenticationLoading(false);
-    setUserIsAuthenticated(false);
-  }, [setUserIsAuthenticated]);
+    userAuthenticationState.setAuthenticated(false);
+  }, []);
 
   /**
    * Flag the user as authenticated.
    */
   const flagUserAsAuthenticated = useCallback(() => {
     setAuthenticationLoading(false);
-    setUserIsAuthenticated(true);
-  }, [setUserIsAuthenticated]);
+    userAuthenticationState.setAuthenticated(true);
+  }, []);
 
   /**
    * If the current user's refreshToken is valid, renew both authToken and
@@ -109,9 +114,13 @@ const AuthenticationRequired = ({
     return success;
   }, []);
 
-
-  const authenticationDispatch
-    = { tokensClear, flagUserAsAuthenticated, tokensRenewal };
+  // Reducer dispatch to child component
+  const authenticationDispatch = {
+    flagUserAsAuthenticated,
+    setAuthenticationLoading,
+    tokensClear,
+    tokensRenewal,
+  };
 
   // Effects
   /**
@@ -151,16 +160,13 @@ const AuthenticationRequired = ({
   if (authenticationLoading) {
     return <h1>Please wait...</h1>;  // TODO: Insert loading component here
 
-  } else if (userIsAuthenticated) {
+  } else if (userAuthenticationState.isAuthenticated) {
     return children;
 
   } else {
     return (
       <div className="AuthenticationRequired">
-        <LoginForm
-          authenticationDispatch={ authenticationDispatch }
-          setAuthenticationLoading={ setAuthenticationLoading }
-        />
+        <LoginForm authenticationDispatch={ authenticationDispatch }/>
       </div>
     );
   }

@@ -24,15 +24,11 @@ export const logout = async(revokeTokenMutation) => {
 }
 
 /**
- * Login form
- * @param {Function} flagUserAsAuthenticated Flags the user as authenticated
- * @param {Function} setAuthenticationLoading Change the Authentication loading
- * state
- * @param {Function} tokensClear Clear the localStorage and flags the user as
- * unauthenticated to log one out
- * @return Login form
+ * Login form component
+ * @param {Object} authenticationDispatch Reducer dispatch from parent
+ * @return Login form component
  */
-const LoginForm  = ({ authenticationDispatch, setAuthenticationLoading }) => {
+const LoginForm  = ({ authenticationDispatch }) => {
   // Authentication mutation
   const [tokenAuthMutation] = useMutation(TOKEN_AUTH_MUTATION);
 
@@ -45,7 +41,7 @@ const LoginForm  = ({ authenticationDispatch, setAuthenticationLoading }) => {
    * and refreshToken if the right credentials are submitted.
    */
   const login = async() => {
-    setAuthenticationLoading(true);
+    authenticationDispatch.setAuthenticationLoading(true);
 
     try {
       const response = await tokenAuthMutation({
