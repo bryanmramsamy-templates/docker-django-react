@@ -7,20 +7,12 @@ import LogoutButton from "../authentication/authentication-required/logout-butto
 
 import { UserAuthenticationStateContext } from '../../contexts/authentication';
 
-
-// NOTE: This is an example component !
-
-/*
- * userIsAuthenticated is a required prop
- */
-
-
 /**
  * Navigation component which gives the user information if logged in and a
  * LogoutButton component.
  * @returns Renders the Nav component
  */
-const Nav = () => {
+const ExampleNav = () => {  // TODO: This is an example component !
   // Authentication query
   const { data, loading, errors, refetch } = useQuery(ME);
 
@@ -48,4 +40,4 @@ const Nav = () => {
 }
 
 
-export default Nav;
+export default ExampleNav;

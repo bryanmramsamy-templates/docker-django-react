@@ -32,18 +32,11 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  * @param {Object} children Children protected components
  * @param {Number} tokenRefreshInterval Tokens renew interval in milliseconds.
  * Default value is set to 4 minutes.
- * @param {Function} setUserIsAuthenticated Set user authentication status.
- * @param {Boolean} userIsAuthenticated True if the user is authenticated.
  * @return The protected content if the user is authenticated, otherwise a login
  * form
  */
-const AuthenticationRequired = ({
-  children,
-  tokenRefreshInterval = 1000 * 60 * 4,
-  setUserIsAuthenticated,
-  userIsAuthenticated
-}) => {
-
+const AuthenticationRequired
+  = ({ children, tokenRefreshInterval = 1000 * 60 * 4 }) => {
   // Authentication mutations
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
@@ -61,7 +54,6 @@ const AuthenticationRequired = ({
    */
   const tokensClear = useCallback(() => {
     localStorage.clear();
-
     setAuthenticationLoading(false);
     userAuthenticationState.setAuthenticated(false);
   }, []);
@@ -82,7 +74,7 @@ const AuthenticationRequired = ({
    */
   const tokensRenewal = useCallback(async (currentRefreshToken) => {
     let success = false;
-    let error = null;
+    let errors = null;
 
     const refreshTokenResponse = await refreshTokenMutation(
         { variables: { refreshToken: currentRefreshToken }});
@@ -101,20 +93,20 @@ const AuthenticationRequired = ({
         refreshToken: currentRefreshToken
       }});
       success = revokeTokenResponse.data.revokeToken.success ? true : false;
-      if(!success) error = revokeTokenResponse.data.revokeToken.error;
+      if(!success) errors = revokeTokenResponse.data.revokeToken.errors;
 
-    } else error = refreshTokenResponse.data.revokeToken.error;
+    } else errors = refreshTokenResponse.data.refreshToken.errors;
 
     if (!success){
       // DEBUG: Error must be handled
-      console.log(error);
+      console.log(errors);
 
       authenticationDispatch.tokensClear();
     }
     return success;
   }, []);
 
-  // Reducer dispatch to child component
+  // Reduce dispatch to child component
   const authenticationDispatch = {
     flagUserAsAuthenticated,
     setAuthenticationLoading,
@@ -156,7 +148,6 @@ const AuthenticationRequired = ({
 
 
   // Conditional renders
-
   if (authenticationLoading) {
     return <h1>Please wait...</h1>;  // TODO: Insert loading component here
 

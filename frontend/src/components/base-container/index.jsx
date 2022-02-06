@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Nav from './nav';
+import ExampleNav from './example-nav';
 
 import { UserAuthenticationStateContext } from "../../contexts/authentication";
 
@@ -7,11 +7,10 @@ import { UserAuthenticationStateContext } from "../../contexts/authentication";
  * Main wrapper container.
  *
  * Should contain every components visible on every page.
- * @param {*} children Children components
- * @param {boolean} userIsAuthenticated True if the user is authenticated.
+ * @param {Object} children Children components
  * @return Renders the base container and its children
  */
-const BaseContainer = ({ children, userIsAuthenticated }) => {
+const BaseContainer = ({ children }) => {
   // State
   const [isAuthenticated, setAuthenticated] = useState(false);
 
@@ -23,7 +22,7 @@ const BaseContainer = ({ children, userIsAuthenticated }) => {
           setAuthenticated: setAuthenticated,
         }}
       >
-        <Nav userIsAuthenticated={ userIsAuthenticated }/>
+        <ExampleNav/>
         { children }
       </UserAuthenticationStateContext.Provider>
     </div>
