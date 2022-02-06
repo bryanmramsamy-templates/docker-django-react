@@ -6,7 +6,8 @@ import { REFRESH_TOKEN_MUTATION, REVOKE_TOKEN_MUTATION }
 
 import LoginForm from './login-form';
 
-import { UserAuthenticationStateContext } from '../../../contexts/authentication';
+import { UserAuthenticationStateContext }
+  from '../../../contexts/authentication';
 
 
 // Env variables
