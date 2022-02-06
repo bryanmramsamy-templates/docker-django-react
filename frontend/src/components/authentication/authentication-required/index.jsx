@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useMutation } from "@apollo/client";
 
 import { REFRESH_TOKEN_MUTATION, REVOKE_TOKEN_MUTATION }
@@ -56,7 +56,7 @@ const AuthenticationRequired
     localStorage.clear();
     setAuthenticationLoading(false);
     userAuthenticationState.setAuthenticated(false);
-  }, []);
+  }, [setAuthenticationLoading, userAuthenticationState]);
 
   /**
    * Flag the user as authenticated.
@@ -64,7 +64,7 @@ const AuthenticationRequired
   const flagUserAsAuthenticated = useCallback(() => {
     setAuthenticationLoading(false);
     userAuthenticationState.setAuthenticated(true);
-  }, []);
+  }, [setAuthenticationLoading, userAuthenticationState]);
 
   /**
    * If the current user's refreshToken is valid, renew both authToken and
@@ -101,18 +101,23 @@ const AuthenticationRequired
       // DEBUG: Error must be handled
       console.log(errors);
 
-      authenticationDispatch.tokensClear();
+      tokensClear();
     }
     return success;
-  }, []);
+  }, [refreshTokenMutation, revokeTokenMutation, tokensClear]);
 
   // Reduce dispatch to child component
-  const authenticationDispatch = {
+  const authenticationDispatch = useMemo(() => ({
     flagUserAsAuthenticated,
     setAuthenticationLoading,
     tokensClear,
     tokensRenewal,
-  };
+  }), [
+    flagUserAsAuthenticated,
+    setAuthenticationLoading,
+    tokensClear,
+    tokensRenewal,
+  ]);
 
   // Effects
   /**
@@ -129,7 +134,7 @@ const AuthenticationRequired
     }, tokenRefreshInterval);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [authenticationDispatch, tokenRefreshInterval]);
 
   /**
    * Set the user as authenticated if one's refreshToken is valid, otherwise
@@ -141,10 +146,10 @@ const AuthenticationRequired
     );
 
     if (refreshToken){
-      if (tokensRenewal(refreshToken))
+      if (authenticationDispatch.tokensRenewal(refreshToken))
         authenticationDispatch.flagUserAsAuthenticated();
     } else authenticationDispatch.tokensClear();
-  }, []);
+  }, [authenticationDispatch]);
 
 
   // Conditional renders

@@ -1,4 +1,3 @@
-import { useReducer, useState } from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import ProtectedRoutes from "./routes/protected-routes";
