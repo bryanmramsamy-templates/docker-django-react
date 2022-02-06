@@ -41,24 +41,21 @@ export const LOCALSTORAGE_REFRESH_TOKEN_KEY = `${ appName }.refreshToken`;
  */
 const AuthenticationRequired = ({
   children,
-  tokenRefreshInterval = 1000 * 60 * 4 ,
+  tokenRefreshInterval: f = 1000 * 60 * 4 ,
   setUserIsAuthenticated,
   userIsAuthenticated
 }) => {
-  // Authentication mutations
+  let tokenRefreshInterval = 10000;  // DEBUG
 
+  // Authentication mutations
   const [verifyTokenMutation] = useMutation(VERIFY_TOKEN_MUTATION);
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
   const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
 
-
   // State
-
   const [authenticationLoading, setAuthenticationLoading] = useState(true);
 
-
   // CallBacks
-
   /**
    * Clears the localStorage from all tokens and flags the user as
    * unauthenticated.
@@ -85,7 +82,7 @@ const AuthenticationRequired = ({
    * @return {boolean} True if both tokens successfully renewed
    */
   const tokensRenewal = useCallback(async (currentRefreshToken) => {
-    let hasSucceeded = false;
+    let success = false;
 
     const refreshTokenResponse = await refreshTokenMutation(
         { variables: { refreshToken: currentRefreshToken }});
@@ -107,12 +104,12 @@ const AuthenticationRequired = ({
       })
 
       revokeTokenResponse.data.revokeToken.success ?
-        hasSucceeded = true : hasSucceeded = false;
+        success = true : success = false;
     }
 
-    if (!hasSucceeded) tokensClear();
+    if (!success) tokensClear();
 
-    return hasSucceeded;
+    return success;
   }, [refreshTokenMutation, revokeTokenMutation, tokensClear]);
 
 

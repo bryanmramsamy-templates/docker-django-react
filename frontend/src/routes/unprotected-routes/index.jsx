@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import LoginPage from "../../pages/authentication/login";
 
 
 /**
@@ -20,6 +21,8 @@ const UnprotectedRoutes = () => {
         // TODO: Put the unprotected home page here
         element={ <h1>Home page 2</h1> }
       />
+
+      <Route path="login" element={ <LoginPage/> }/>
     </Routes>
   );
 }
