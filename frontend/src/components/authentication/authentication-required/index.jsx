@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useMutation } from "@apollo/client";
 
-import { REFRESH_TOKEN_MUTATION, REVOKE_TOKEN_MUTATION }
+import { REFRESH_TOKEN_MUTATION }
   from '../../../api/authentication/auth-token-mutations';
 
 import LoginForm from './login-form';
@@ -42,7 +42,6 @@ const AuthenticationRequired
   = ({ children, tokenRefreshInterval = JWT_RENEW_INTERVAL }) => {
   // Authentication mutations
   const [refreshTokenMutation] = useMutation(REFRESH_TOKEN_MUTATION);
-  const [revokeTokenMutation] = useMutation(REVOKE_TOKEN_MUTATION);
 
   // State
   const [authenticationLoading, setAuthenticationLoading] = useState(true);
@@ -76,9 +75,6 @@ const AuthenticationRequired
    * @return {Boolean} True if both tokens successfully renewed
    */
   const tokensRenewal = useCallback(async (currentRefreshToken) => {
-    let success = false;
-    let errors = null;
-
     const refreshTokenResponse = await refreshTokenMutation(
         { variables: { refreshToken: currentRefreshToken }});
 
@@ -92,22 +88,15 @@ const AuthenticationRequired
         refreshTokenResponse.data.refreshToken.refreshToken
       );
 
-      const revokeTokenResponse = await revokeTokenMutation({ variables: {
-        refreshToken: currentRefreshToken
-      }});
-      success = revokeTokenResponse.data.revokeToken.success ? true : false;
-      if(!success) errors = revokeTokenResponse.data.revokeToken.errors;
-
-    } else errors = refreshTokenResponse.data.refreshToken.errors;
-
-    if (!success){
+    } else {
       // TODO: Error must be handled
-      console.log(errors);
+      console.log(refreshTokenResponse.data.refreshToken.errors);
 
       tokensClear();
     }
-    return success;
-  }, [refreshTokenMutation, revokeTokenMutation, tokensClear]);
+
+    return refreshTokenResponse.data.refreshToken.success;
+  }, [refreshTokenMutation, tokensClear]);
 
   // Reduce dispatch to child component
   const authenticationDispatch = useMemo(() => ({

@@ -7,7 +7,6 @@ import {
 } from '../../../api/authentication/auth-token-mutations';
 
 
-
 /**
  * Logout button component
  * @return Logout button component
@@ -21,28 +20,22 @@ const LogoutButton = () => {
    * token and reload the page to get the login form back.
    */
   const logout = async() => {
-    let errors = null;
-
     const refreshToken = localStorage.getItem(LOCALSTORAGE_REFRESH_TOKEN_KEY);
     if (refreshToken) {
         const revokeTokenResponse
           = await revokeTokenMutation({ variables: { refreshToken }});
 
         if (revokeTokenResponse.data.revokeToken.errors){
-          errors = revokeTokenResponse.data.revokeToken.errors
+          // TODO: Error must be handled
+          console.log(revokeTokenResponse.data.revokeToken.errors);
         }
     }
-
     localStorage.clear();
     window.location.reload();
-
-    if (errors) console.log(errors);  // TODO: Error must be handled
   }
 
   // Handle function
-  const handleOnLogout = () => {
-    logout();
-  }
+  const handleOnLogout = () => logout();
 
   // TODO: Create custom logout component
   return (
