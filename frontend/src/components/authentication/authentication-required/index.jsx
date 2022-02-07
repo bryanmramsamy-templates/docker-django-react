@@ -152,7 +152,8 @@ const AuthenticationRequired
       if (authenticationDispatch.tokensRenewal(refreshToken))
         authenticationDispatch.flagUserAsAuthenticated();
     } else authenticationDispatch.tokensClear();
-  }, [authenticationDispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   // Conditional renders
