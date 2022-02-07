@@ -13,7 +13,9 @@ import { UserAuthenticationStateContext }
 // Env variables
 const APP_NAME = process.env.REACT_APP_NAME;
 const JWT_RENEW_INTERVAL
-  = 1000 * 60 * (Number(process.env.REACT_APP_JWT_EXPIRATION_DELTA) - 1);
+  = (Number(process.env.REACT_APP_JWT_EXPIRATION_DELTA) > 1)
+  ? 1000 * 60 * (Number(process.env.REACT_APP_JWT_EXPIRATION_DELTA) - 1)
+  : 1000 * 30;
 
 // Token keys
 export const LOCALSTORAGE_TOKEN_AUTH_KEY = `${ APP_NAME }.tokenAuth`;
