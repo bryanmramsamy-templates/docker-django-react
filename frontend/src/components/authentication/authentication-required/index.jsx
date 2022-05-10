@@ -139,10 +139,13 @@ const AuthenticationRequired
       LOCALSTORAGE_REFRESH_TOKEN_KEY
     );
 
-    if (refreshToken){
-      if (authenticationDispatch.tokensRenewal(refreshToken))
-        authenticationDispatch.flagUserAsAuthenticated();
-    } else authenticationDispatch.tokensClear();
+    (async() => {
+      if (refreshToken) {
+        if (await authenticationDispatch.tokensRenewal(refreshToken)) {
+          authenticationDispatch.flagUserAsAuthenticated();
+        }
+      } else authenticationDispatch.tokensClear();
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
